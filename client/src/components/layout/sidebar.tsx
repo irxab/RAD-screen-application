@@ -18,6 +18,7 @@ export default function Sidebar({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-pie' },
     { id: 'enhanced', label: 'Enhanced Dashboard', icon: 'fas fa-chart-line' },
+    { id: 'reports', label: 'Ad Reports', icon: 'fas fa-file-chart-column' },
     { id: 'ads', label: 'Ad Management', icon: 'fas fa-rectangle-ad' },
     { id: 'scheduler', label: 'Scheduler', icon: 'fas fa-calendar-alt' },
     { id: 'player', label: 'Player Preview', icon: 'fas fa-play' },

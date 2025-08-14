@@ -182,8 +182,8 @@ export default function InteractiveMap() {
                     <div
                       className="absolute w-4 h-4 bg-rad-blue rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-smooth z-10"
                       style={{
-                        left: `${((point.lng - 46.6753) / 0.01 + 50)}%`,
-                        top: `${((point.lat - 24.7136) / 0.01 + 50)}%`,
+                        left: `${((parseFloat(point.lng) - 46.6753) / 0.01 + 50)}%`,
+                        top: `${((parseFloat(point.lat) - 24.7136) / 0.01 + 50)}%`,
                         transform: 'translate(-50%, -50%)'
                       }}
                       onClick={(e) => {
@@ -197,8 +197,8 @@ export default function InteractiveMap() {
                     <div
                       className="absolute border-2 border-rad-orange rounded-full opacity-30 pointer-events-none"
                       style={{
-                        left: `${((point.lng - 46.6753) / 0.01 + 50)}%`,
-                        top: `${((point.lat - 24.7136) / 0.01 + 50)}%`,
+                        left: `${((parseFloat(point.lng) - 46.6753) / 0.01 + 50)}%`,
+                        top: `${((parseFloat(point.lat) - 24.7136) / 0.01 + 50)}%`,
                         width: `${point.radius / 10}px`,
                         height: `${point.radius / 10}px`,
                         transform: 'translate(-50%, -50%)'
