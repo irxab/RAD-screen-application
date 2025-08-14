@@ -57,10 +57,17 @@ export default function InteractiveMap() {
         name: `Point-${fixedPoints.length + 1}`,
         lat,
         lng,
-        radius: newPointRadius
+        radius: newPointRadius,
+        screenIds: [],
+        crowdLevel: 'Medium',
+        trafficFlow: 'Medium'
       };
       
       await store.createFixedPoint(point);
+      
+      // Refresh data
+      const updatedPoints = await store.getFixedPoints();
+      setFixedPoints(updatedPoints);
       
       toast({
         title: "Point Created",
@@ -80,6 +87,11 @@ export default function InteractiveMap() {
     if (window.confirm("Are you sure you want to delete this point?")) {
       try {
         await store.deleteFixedPoint(pointId);
+        
+        // Refresh data
+        const updatedPoints = await store.getFixedPoints();
+        setFixedPoints(updatedPoints);
+        
         toast({
           title: "Point Deleted",
           description: "Fixed point has been deleted",
@@ -95,9 +107,20 @@ export default function InteractiveMap() {
     }
   };
 
-  const handleRadiusChange = async (pointId: string, radius: number) => {
+  const handleRadiusChange = async (pointId: string, newRadius: number) => {
     try {
-      await store.updateFixedPoint(pointId, { radius });
+      await store.updateFixedPoint(pointId, { radius: newRadius });
+      
+      // Update local state
+      setFixedPoints(prev => prev.map(p => 
+        p.id === pointId ? { ...p, radius: newRadius } : p
+      ));
+      
+      toast({
+        title: "Radius Updated",
+        description: "Fixed point radius has been updated",
+        variant: "default"
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -112,7 +135,7 @@ export default function InteractiveMap() {
       await store.exportRoutes();
       toast({
         title: "Routes Exported",
-        description: "Route data has been exported to CSV",
+        description: "Routes data has been exported to CSV",
         variant: "default"
       });
     } catch (error) {
@@ -123,6 +146,8 @@ export default function InteractiveMap() {
       });
     }
   };
+
+
 
   const handleBindScreens = async (pointId: string, screenIds: string[]) => {
     try {
@@ -176,50 +201,66 @@ export default function InteractiveMap() {
                 ></div>
 
                 {/* Fixed Points */}
-                {fixedPoints.map((point, index) => (
-                  <div key={point.id}>
-                    {/* Point marker */}
-                    <div
-                      className="absolute w-4 h-4 bg-rad-blue rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-smooth z-10"
-                      style={{
-                        left: `${((parseFloat(point.lng) - 46.6753) / 0.01 + 50)}%`,
-                        top: `${((parseFloat(point.lat) - 24.7136) / 0.01 + 50)}%`,
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedPoint(point);
-                      }}
-                      data-testid={`point-marker-${point.id}`}
-                    />
-                    
-                    {/* Radius circle */}
-                    <div
-                      className="absolute border-2 border-rad-orange rounded-full opacity-30 pointer-events-none"
-                      style={{
-                        left: `${((parseFloat(point.lng) - 46.6753) / 0.01 + 50)}%`,
-                        top: `${((parseFloat(point.lat) - 24.7136) / 0.01 + 50)}%`,
-                        width: `${point.radius / 10}px`,
-                        height: `${point.radius / 10}px`,
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                    />
-                  </div>
-                ))}
+                {fixedPoints.map((point, index) => {
+                  const lat = typeof point.lat === 'string' ? parseFloat(point.lat) : point.lat;
+                  const lng = typeof point.lng === 'string' ? parseFloat(point.lng) : point.lng;
+                  const radius = typeof point.radius === 'string' ? parseFloat(point.radius) : point.radius;
+                  
+                  return (
+                    <div key={point.id}>
+                      {/* Point marker */}
+                      <div
+                        className="absolute w-4 h-4 bg-rad-blue rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-smooth z-10"
+                        style={{
+                          left: `${((lng - 46.6753) / 0.01 + 50)}%`,
+                          top: `${((lat - 24.7136) / 0.01 + 50)}%`,
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPoint(point);
+                        }}
+                        data-testid={`point-marker-${point.id}`}
+                      />
+                      
+                      {/* Radius circle */}
+                      <div
+                        className="absolute border-2 border-rad-orange rounded-full opacity-30 pointer-events-none"
+                        style={{
+                          left: `${((lng - 46.6753) / 0.01 + 50)}%`,
+                          top: `${((lat - 24.7136) / 0.01 + 50)}%`,
+                          width: `${radius / 10}px`,
+                          height: `${radius / 10}px`,
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                      />
+                    </div>
+                  );
+                })}
 
                 {/* Route Paths - SVG overlay */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                  {routes.map((route, index) => (
-                    <path
-                      key={index}
-                      d={route.path}
-                      stroke="#ff7a00"
-                      strokeWidth="3"
-                      fill="none"
-                      strokeDasharray="5,5"
-                      opacity="0.8"
-                    />
-                  ))}
+                  {routes.map((route, index) => {
+                    if (!route.coordinates || route.coordinates.length < 2) return null;
+                    
+                    const pathData = route.coordinates.map((coord, i) => {
+                      const x = ((coord.lng - 46.6753) / 0.01 + 50) / 100 * 100;
+                      const y = ((coord.lat - 24.7136) / 0.01 + 50) / 100 * 100;
+                      return `${i === 0 ? 'M' : 'L'} ${x}% ${y}%`;
+                    }).join(' ');
+                    
+                    return (
+                      <path
+                        key={route.id}
+                        d={pathData}
+                        stroke="#ff7a00"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeDasharray="5,5"
+                        opacity="0.8"
+                      />
+                    );
+                  })}
                 </svg>
 
                 {/* Map Controls */}
@@ -287,7 +328,7 @@ export default function InteractiveMap() {
                         </button>
                       </div>
                       <p className="text-xs text-rad-grey-600 mb-2">
-                        {point.lat.toFixed(4)}, {point.lng.toFixed(4)}
+                        {typeof point.lat === 'number' ? point.lat.toFixed(4) : point.lat}, {typeof point.lng === 'number' ? point.lng.toFixed(4) : point.lng}
                       </p>
                       <div className="flex items-center space-x-2">
                         <span className="text-xs text-rad-grey-600">Radius:</span>
@@ -392,6 +433,54 @@ export default function InteractiveMap() {
                   <p className="text-xs text-rad-grey-600">
                     Binding to: {selectedPoint.name}
                   </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Route Analytics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-rad-grey-800">
+                Route Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {routes.length === 0 ? (
+                  <div className="text-center text-rad-grey-500 py-4">
+                    <i className="fas fa-route text-2xl mb-2"></i>
+                    <p>No routes available</p>
+                    <p className="text-sm">Routes will show traffic analytics</p>
+                  </div>
+                ) : (
+                  routes.map(route => (
+                    <div key={route.id} className="p-3 border border-rad-grey-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-rad-grey-800">
+                          {route.name}
+                        </span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          route.trafficLevel === 'Heavy' ? 'bg-red-100 text-red-800' :
+                          route.trafficLevel === 'Medium' ? 'bg-orange-100 text-orange-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {route.trafficLevel} Traffic
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-rad-grey-600">
+                        <div>
+                          <span className="font-medium">Screens:</span> {route.screenCount}
+                        </div>
+                        <div>
+                          <span className="font-medium">Daily Views:</span> {route.dailyViews?.toLocaleString() || 'N/A'}
+                        </div>
+                        <div className="col-span-2">
+                          <span className="font-medium">Peak Hours:</span> {route.peakHours?.join(', ') || 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
             </CardContent>

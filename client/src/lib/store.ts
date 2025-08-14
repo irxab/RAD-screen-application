@@ -288,6 +288,41 @@ export class Store {
   // Map and Routes
   async getFixedPoints() {
     await this.delay();
+    if (!this.data.fixedPoints) {
+      this.data.fixedPoints = [
+        {
+          id: 'fp1',
+          name: 'King Fahd Road Junction',
+          lat: 24.7136,
+          lng: 46.6753,
+          radius: 300,
+          screenIds: ['s1', 's2'],
+          crowdLevel: 'Very High',
+          trafficFlow: 'Heavy'
+        },
+        {
+          id: 'fp2', 
+          name: 'Olaya District Center',
+          lat: 24.6877,
+          lng: 46.7219,
+          radius: 250,
+          screenIds: ['s3'],
+          crowdLevel: 'High',
+          trafficFlow: 'Medium'
+        },
+        {
+          id: 'fp3',
+          name: 'Kingdom Tower Area',
+          lat: 24.6958,
+          lng: 46.6845,
+          radius: 200,
+          screenIds: ['s4'],
+          crowdLevel: 'Medium',
+          trafficFlow: 'High'
+        }
+      ];
+      this.saveData();
+    }
     return this.data.fixedPoints || [];
   }
 
@@ -335,6 +370,50 @@ export class Store {
 
   async getRoutes() {
     await this.delay();
+    if (!this.data.routes) {
+      this.data.routes = [
+        {
+          id: 'r1',
+          name: 'King Fahd Road - Main Route',
+          coordinates: [
+            { lat: 24.7050, lng: 46.6700 },
+            { lat: 24.7136, lng: 46.6753 },
+            { lat: 24.7220, lng: 46.6800 }
+          ],
+          trafficLevel: 'Heavy',
+          screenCount: 5,
+          dailyViews: 45000,
+          peakHours: ['07:00-09:00', '17:00-20:00']
+        },
+        {
+          id: 'r2',
+          name: 'Olaya Street Corridor', 
+          coordinates: [
+            { lat: 24.6800, lng: 46.7150 },
+            { lat: 24.6877, lng: 46.7219 },
+            { lat: 24.6950, lng: 46.7280 }
+          ],
+          trafficLevel: 'Medium',
+          screenCount: 3,
+          dailyViews: 32000,
+          peakHours: ['08:00-10:00', '18:00-21:00']
+        },
+        {
+          id: 'r3',
+          name: 'Prince Turki Street',
+          coordinates: [
+            { lat: 24.7600, lng: 46.7300 },
+            { lat: 24.7661, lng: 46.7380 },
+            { lat: 24.7720, lng: 46.7450 }
+          ],
+          trafficLevel: 'Medium',
+          screenCount: 2,
+          dailyViews: 28000,
+          peakHours: ['07:30-09:30', '16:30-19:30']
+        }
+      ];
+      this.saveData();
+    }
     return this.data.routes || [];
   }
 
