@@ -1,0 +1,104 @@
+You are a senior full-stack developer + UX designer building a production-like demonstration web app for "RAD" (rebrand of TAXIHUB). Follow the four STAGES below and **pause after STAGE 1** to wait for approval before continuing. Target: a responsive, accessible, modular HTML/CSS/JS app that can run on Replit static hosting. Use vanilla ES6 JavaScript modules, mobile-first CSS (Flexbox/Grid), and semantic HTML. Keep code clean, well-commented, and follow best practices.
+
+GENERAL REQUIREMENTS
+- Branding: company name = "RAD"
+- Colors: primary blue (use #0b6ef6 or similar), accent orange (#ff7a00), neutral greys (#f4f6f8, #e2e6ea, #6b7280)
+- Layout: mobile-first breakpoints: <=640px mobile, 641-1024 tablet, >1024 desktop
+- Accessibility: semantic tags, labels, ARIA where necessary, keyboard navigation
+- Data: use `data/sampleData.json` and persist runtime changes to `localStorage` as "RAD_DB"
+- File structure:
+  - index.html
+  - css/styles.css
+  - js/app.js
+  - js/store.js
+  - js/router.js
+  - js/components/{auth, dashboard, player, ads, scheduler, map, logs, settings}.js
+  - data/sampleData.json
+  - assets/{logo.svg, icons, sample-ad1.jpg, sample-ad2.mp4}
+  - README.md
+
+STAGE 1 — DESIGN PLANNING (deliver first, WAIT for approval)
+1) Provide a short written Design Plan: list core components, mobile & desktop layout sketches (text description), key interactions & animations, and the technical approach including the state model (keys and sample JSON shape).
+2) Provide the acceptance criteria and test checklist.
+Do not write code yet. Wait for owner approval after delivering Stage 1.
+
+STAGE 2 — HTML STRUCTURE
+- Create a single `index.html` with:
+  - Proper doctype, lang="en", meta viewport, title "RAD — Ad Display Platform (Demo)".
+  - Semantic sections: header (logo + nav), main (role-based view containers), footer.
+  - Each major component should have a top-level `<section id="...">` or `<main id="...">` and include placeholder markup for dynamic content.
+  - Include clear classes and IDs using BEM-like naming (`rad-header`, `rad-dashboard__card`, `rad-btn`, etc.).
+  - Strong comments explaining each section and accessibility hooks (aria-live, role, etc).
+- Leave script tags for modular JS (`type="module"`) and a `<link>` to CSS.
+
+STAGE 3 — CSS STYLING
+- Provide `css/styles.css` with:
+  - Mobile-first layout, then media queries for tablet & desktop.
+  - Use CSS Grid for dashboard grid and Flexbox for lists and nav.
+  - Variables for brand colors and spacing.
+  - Smooth transitions for interactive elements `transition: transform .18s ease, opacity .15s ease`.
+  - Animations: subtle fade-in on cards, slide-in right for detail drawers.
+  - Utility classes: `.rad-hidden`, `.rad-sr-only`, `.rad-flex-center`.
+  - Comments explaining key style decisions and accessible focus states.
+  - Make UI polished: rounded 12px cards, soft shadows, 2xl border radii for large cards, consistent spacing.
+
+STAGE 4 — JAVASCRIPT FUNCTIONALITY
+- Use ES6 modules. Keep code modular and well-commented.
+- Implement `js/store.js`: small class `Store` with methods `get(collection)`, `create(collection, obj)`, `update(collection, id, delta)`, `delete(collection, id)`, `exportCSV(collection)`. Simulate async delays with `await new Promise(r => setTimeout(r, 200))`.
+- Implement `js/router.js`: hash-based router mapping `#home`, `#programs`, `#map`, `#logs`, `#settings`.
+- Implement core components:
+  - **Auth**: simple login form. On success, save `currentUser` in Store. Provide demo user roles (admin/operator).
+  - **Dashboard**: cards showing counts (Active Ads, Plays today, Screens, Pending reviews). Chart placeholders (no external libs) or basic SVG sparkline.
+  - **Player Preview**: show currently scheduled ad(s) for selected screen and a "screenshot" capture button that saves an image data placeholder to logs.
+  - **Ad List & Editor**: CRUD for ads. Upload is demo (use FileReader to read preview). Fields: title, type (image/video), duration, count limit, start/end date, time windows (array).
+  - **Scheduler / Program Editor**: assign ads to screens by time windows and count limits. Desktop: enable drag-and-drop from ad list to a daily schedule grid (implement HTML5 Drag & Drop). Mobile: tap-to-assign modal.
+  - **Fixed-Point Map**: simple interactive map area where user can click to create a point (lat/lng simulated) and adjust radius with slider. Bind screens to the fixed-point using multi-select list. Visualize circle overlay via SVG or absolutely positioned element.
+  - **Driving Route / Hotspots**: show mock routes (array of coordinates) and compute hotspots by proximity to fixed-points — list the top triggered points. Provide an export button for route logs.
+  - **Logs & Export**: display logs with filters (date range, screen) and an “Export CSV” button that calls Store.exportCSV and triggers file download.
+  - **Settings**: brightness control slider (1–255), toggles for auto/manual brightness, package upgrade simulation (enter version -> simulate upload), driver binding form (name, phone, alias).
+- Error handling & UX:
+  - Validate forms, show inline errors, show toast on success/failure.
+  - Wrap async calls in try/catch and surface readable messages.
+  - Prevent UI freeze on long ops with disabled buttons and spinner.
+- Performance:
+  - Debounce inputs where necessary (search, sliders).
+  - Lazy render large lists (simple virtualization by slicing visible items).
+- Testing hooks:
+  - Add a `DEV` panel accessible via `#debug` to reset DB, load sample data, and run demo play simulation (triggers logs).
+
+ADDITIONAL GUIDELINES (apply everywhere)
+- Keep code modular and reusable: small components, single responsibility.
+- Prioritize performance and accessibility.
+- Use consistent code style and comments at top of each file explaining responsibilities.
+- Progressive enhancement: features degrade gracefully if JS disabled (e.g., forms still visible).
+- Use purely client-side code; provide clear comments where an actual backend endpoint would exist.
+- Output a clean README with instructions: how to run on Replit, how to reset DB, and where sample data is.
+
+SAMPLE JSON (data/sampleData.json)
+{
+  "users": [
+    {"id":"u1","name":"Admin RAD","email":"admin@rad.test","role":"admin"}
+  ],
+  "screens": [
+    {"id":"s1","name":"Screen-001","lat":24.7136,"lng":46.6753,"alias":"Riyadh-1"}
+  ],
+  "ads": [
+    {"id":"a1","title":"Coffee Promo","type":"image","asset":"assets/sample-ad1.jpg","duration":15,"countLimit":100,"timeWindows":[{"start":"08:00","end":"10:00"}],"startDate":"2025-08-01","endDate":"2025-08-31"}
+  ],
+  "programs": [],
+  "logs": [],
+  "routes":[]
+}
+
+DELIVERABLES (for each stage)
+- Stage 1: design plan & acceptance checklist (wait for approval).
+- Stage 2: index.html committed and previewable.
+- Stage 3: styles.css committed, responsive on mobile+desktop, screenshots or preview.
+- Stage 4: JS modules committed, all interactions working, README updated, test/demo button that sim-plays ads & records logs.
+
+AFTER FINISH
+- Provide final checklist demonstrating how acceptance criteria are met.
+- Provide short developer notes about improvements for production (backend API endpoints, database choices, using Leaflet/Google Maps for real maps, authentication tokens).
+
+IMPORTANT: After you complete STAGE 1 (text plan), stop and ask the owner to APPROVE. Only after the owner approves, implement STAGES 2–4.
+
