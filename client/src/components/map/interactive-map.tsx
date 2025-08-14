@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,12 +9,34 @@ import { useToast } from "@/hooks/use-toast";
 export default function InteractiveMap() {
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [newPointRadius, setNewPointRadius] = useState(200);
+  const [fixedPoints, setFixedPoints] = useState<any[]>([]);
+  const [hotspots, setHotspots] = useState<any[]>([]);
+  const [screens, setScreens] = useState<any[]>([]);
+  const [routes, setRoutes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fixedPoints = store.getFixedPoints();
-  const hotspots = store.getHotspots();
-  const screens = store.getAllScreens();
-  const routes = store.getRoutes();
+  useEffect(() => {
+    const loadMapData = async () => {
+      try {
+        const [pointsData, hotspotsData, screensData, routesData] = await Promise.all([
+          store.getFixedPoints(),
+          store.getHotspots(),
+          store.getAllScreens(),
+          store.getRoutes()
+        ]);
+        setFixedPoints(pointsData);
+        setHotspots(hotspotsData);
+        setScreens(screensData);
+        setRoutes(routesData);
+      } catch (error) {
+        console.error('Failed to load map data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadMapData();
+  }, []);
 
   const handleMapClick = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();

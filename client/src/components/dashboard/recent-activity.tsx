@@ -1,9 +1,25 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { store } from "@/lib/store";
 
 export default function RecentActivity() {
-  const activities = store.getRecentActivity();
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadActivities = async () => {
+      try {
+        const recentActivities = store.getRecentActivity();
+        setActivities(recentActivities);
+      } catch (error) {
+        console.error('Failed to load activities:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadActivities();
+  }, []);
 
   const getActivityColor = (type: string) => {
     switch (type) {

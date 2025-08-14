@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,11 +13,25 @@ export default function AdList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [ads, setAds] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const ads = store.getAllAds();
+  useEffect(() => {
+    const loadAds = async () => {
+      try {
+        const allAds = await store.getAllAds();
+        setAds(allAds);
+      } catch (error) {
+        console.error('Failed to load ads:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAds();
+  }, []);
   
-  const filteredAds = ads.filter(ad => {
+  const filteredAds = ads.filter((ad: any) => {
     const matchesSearch = ad.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === "all" || ad.type === typeFilter;
     const matchesStatus = statusFilter === "all" || ad.status === statusFilter;
@@ -38,6 +52,9 @@ export default function AdList() {
     if (window.confirm("Are you sure you want to delete this ad?")) {
       try {
         await store.deleteAd(adId);
+        // Refresh the ads list
+        const allAds = await store.getAllAds();
+        setAds(allAds);
         toast({
           title: "Ad Deleted",
           description: "The ad has been successfully deleted",
@@ -70,6 +87,9 @@ export default function AdList() {
           variant: "default"
         });
       }
+      // Refresh the ads list
+      const allAds = await store.getAllAds();
+      setAds(allAds);
       setShowForm(false);
       setEditingAd(null);
     } catch (error) {

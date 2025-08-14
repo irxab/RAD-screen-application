@@ -5,6 +5,7 @@ import Header from "@/components/layout/header";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import PerformanceChart from "@/components/dashboard/performance-chart";
 import RecentActivity from "@/components/dashboard/recent-activity";
+import EnhancedDashboard from "@/components/dashboard/enhanced-dashboard";
 import AdList from "@/components/ads/ad-list";
 import ScheduleGrid from "@/components/scheduler/schedule-grid";
 import PlayerPreview from "@/components/player/player-preview";
@@ -51,6 +52,8 @@ export default function Home() {
         return <SettingsPanel />;
       case 'debug':
         return <SettingsPanel showDebug={true} />;
+      case 'enhanced':
+        return <EnhancedDashboard />;
       default:
         return (
           <>
@@ -71,6 +74,7 @@ export default function Home() {
   const getPageTitle = () => {
     const titles = {
       dashboard: 'Dashboard',
+      enhanced: 'Enhanced Dashboard',
       ads: 'Ad Management',
       scheduler: 'Scheduler',
       player: 'Player Preview',
@@ -78,7 +82,7 @@ export default function Home() {
       logs: 'Activity Logs',
       settings: 'Settings',
       debug: 'Debug Panel'
-    };
+    } as { [key: string]: string };
     return titles[currentView] || 'RAD';
   };
 

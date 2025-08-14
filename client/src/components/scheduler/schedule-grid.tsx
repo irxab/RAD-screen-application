@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,11 +8,31 @@ import { useToast } from "@/hooks/use-toast";
 export default function ScheduleGrid() {
   const [selectedScreen, setSelectedScreen] = useState("all");
   const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [ads, setAds] = useState<any[]>([]);
+  const [screens, setScreens] = useState<any[]>([]);
+  const [schedule, setSchedule] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const ads = store.getAllAds().filter(ad => ad.status === 'active');
-  const screens = store.getAllScreens();
-  const schedule = store.getSchedule(selectedScreen);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [allAds, allScreens, scheduleData] = await Promise.all([
+          store.getAllAds(),
+          store.getAllScreens(),
+          store.getSchedule(selectedScreen)
+        ]);
+        setAds(allAds.filter((ad: any) => ad.status === 'active'));
+        setScreens(allScreens);
+        setSchedule(scheduleData);
+      } catch (error) {
+        console.error('Failed to load schedule data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [selectedScreen]);
 
   const timeSlots = [
     "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +11,31 @@ export default function PlayerPreview() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(75);
   const [progress, setProgress] = useState(60);
+  const [screens, setScreens] = useState<any[]>([]);
+  const [playlist, setPlaylist] = useState<any[]>([]);
+  const [screenStatus, setScreenStatus] = useState<any>({});
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const screens = store.getAllScreens();
-  const playlist = store.getCurrentPlaylist(selectedScreen);
-  const screenStatus = store.getScreenStatus(selectedScreen);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [allScreens, playlistData, statusData] = await Promise.all([
+          store.getAllScreens(),
+          store.getCurrentPlaylist(selectedScreen),
+          store.getScreenStatus(selectedScreen)
+        ]);
+        setScreens(allScreens);
+        setPlaylist(playlistData);
+        setScreenStatus(statusData);
+      } catch (error) {
+        console.error('Failed to load player data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [selectedScreen]);
 
   const handleScreenshot = async () => {
     try {

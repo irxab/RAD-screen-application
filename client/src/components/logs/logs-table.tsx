@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,10 +13,28 @@ export default function LogsTable() {
   const [screenFilter, setScreenFilter] = useState("all");
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [screens, setScreens] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const screens = store.getAllScreens();
-  const logs = store.getLogs();
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [allScreens, allLogs] = await Promise.all([
+          store.getAllScreens(),
+          store.getLogs()
+        ]);
+        setScreens(allScreens);
+        setLogs(allLogs);
+      } catch (error) {
+        console.error('Failed to load logs data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
   const itemsPerPage = 10;
 
   // Filter logs
