@@ -15,6 +15,7 @@ declare global {
     initMap: () => void;
     mapService: any;
     mapUI: any;
+    openScreenDetails: (screenId: string) => void;
   }
 }
 
@@ -58,31 +59,40 @@ export default function GoogleMap() {
     }
   };
 
-  const loadGoogleMaps = () => {
+  const loadGoogleMaps = async () => {
     if (window.google && window.google.maps) {
       initializeMap();
       return;
     }
 
-    const apiKey = import.meta.env.VITE_MAPS_API_KEY || process.env.MAPS_API_KEY;
-    if (!apiKey) {
-      setMapError('Google Maps API key not found. Please set MAPS_API_KEY in environment variables.');
+    try {
+      // Fetch API key from server
+      const response = await fetch('/api/config/maps-key');
+      const data = await response.json();
+      
+      if (!response.ok || !data.apiKey) {
+        setMapError('Google Maps API key not configured on server.');
+        setIsLoading(false);
+        return;
+      }
+
+      const apiKey = data.apiKey;
+      window.initMap = initializeMap;
+
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry,visualization&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => {
+        setMapError('Failed to load Google Maps API. Please check your API key and network connection.');
+        setIsLoading(false);
+      };
+
+      document.head.appendChild(script);
+    } catch (error) {
+      setMapError('Failed to fetch API configuration from server.');
       setIsLoading(false);
-      return;
     }
-
-    window.initMap = initializeMap;
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry,visualization&callback=initMap`;
-    script.async = true;
-    script.defer = true;
-    script.onerror = () => {
-      setMapError('Failed to load Google Maps API. Please check your API key and network connection.');
-      setIsLoading(false);
-    };
-
-    document.head.appendChild(script);
   };
 
   const initializeMap = () => {
