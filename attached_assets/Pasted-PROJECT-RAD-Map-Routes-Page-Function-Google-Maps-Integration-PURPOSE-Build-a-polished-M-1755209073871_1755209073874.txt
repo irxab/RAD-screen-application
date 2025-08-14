@@ -1,0 +1,215 @@
+PROJECT: RAD — Map & Routes Page / Function (Google Maps Integration)
+
+PURPOSE
+Build a polished Map & Routes page for RAD that integrates the Google Maps JavaScript API to:
+- show all screen locations as markers,
+- allow clicking a marker to open a full detail panel (or bottom sheet on mobile) showing: screen metadata, where the screen has been (route/history), assigned driver name and phone number (click-to-call), last screenshot/preview, last seen timestamp, active ads, and quick actions (Call, Directions, Export Logs).
+
+ENVIRONMENT & TECH STACK
+- Target: Replit (static HTML/CSS/JS) or any static host. Use vanilla ES6 JavaScript (modules).
+- Google Maps JS API v3 (Maps JavaScript + Geometry + MarkerClusterer + Places optional).
+- Store API key in an environment variable: `MAPS_API_KEY` (do **not** hardcode keys in public code).
+- Files to add/update: 
+  - `index.html` (map page stub)
+  - `css/map.css`
+  - `js/map.js`
+  - `js/screensService.js` (data loader / API wrapper)
+  - `data/screens.json` (sample data)
+  - `assets/` (marker icons, screenshots)
+- Progressive enhancement: if Google Maps fails/unavailable, fallback to Leaflet + OpenStreetMap.
+
+SAMPLE DATA MODEL (data/screens.json)
+{
+  "screens": [
+    {
+      "id":"s1",
+      "name":"Screen Riyadh 1",
+      "alias":"Riyadh-1",
+      "lat":24.7136,
+      "lng":46.6753,
+      "status":"active",      // active | offline | maintenance
+      "brightness":120,
+      "lastSeen":"2025-08-14T13:24:00Z",
+      "lastScreenshot":"assets/screens/s1-last.jpg",
+      "assignedDriverId":"d1",
+      "assignedAds":["a1","a2"],
+      "hardware":"Model X",
+      "notes":"Mounted on roof of taxi",
+      "history":[
+         {"ts":"2025-08-14T12:00:00Z","lat":24.7136,"lng":46.6753},
+         {"ts":"2025-08-14T11:45:00Z","lat":24.7122,"lng":46.6740}
+      ]
+    }
+  ],
+  "drivers":[
+    {"id":"d1","name":"Ahmed Al", "phone":"+966500000000"}
+  ],
+  "ads":[
+    {"id":"a1","title":"Coffee Promo"}
+  ],
+  "logs":[]
+}
+
+UX & UI SPEC
+- Desktop:
+  - Full-screen map (left: 70–80%) + right-hand detail panel (20–30%) that slides in on marker click.
+  - Top toolbar: search by screen name/alias, filter by status/driver/date-range, cluster toggle, heatmap toggle, real-time toggle.
+  - Right panel: header (screen name, alias, status pill), driver card (name + phone clickable), last seen timestamp, last screenshot thumbnail, quick stats (plays today, failures), History timeline (list) + mini-map or polyline chart, "Export route" and "Export logs" buttons.
+- Mobile:
+  - Map fills screen; marker click opens a bottom sheet (drag-to-dismiss) showing same content in vertical layout and large call-to-action buttons (Call driver, Directions).
+- Marker behavior:
+  - Custom marker icons colored by status (blue primary, orange active alerts, grey offline).
+  - Marker cluster for dense areas (use MarkerClusterer).
+  - Hover: show small tooltip with name & lastSeen; click: pan & open detail.
+- Route visualization:
+  - Draw polyline for recent history (last N points configurable; default N=100).
+  - Optional directional arrows or animated playback control (play/pause scrubber) to simulate movement over time.
+- Interactions:
+  - Click marker -> map centers, marker bounces briefly, opens info window with 'View details' -> opens panel/bottom sheet.
+  - In panel, clicking driver phone triggers `tel:` link.
+  - Directions button opens Google Maps directions using `https://www.google.com/maps/dir/?api=1&destination=lat,lng`.
+  - Export buttons generate CSV/GeoJSON download of the selected screen’s history/logs.
+
+FUNCTIONAL REQUIREMENTS
+1. Map init:
+   - Use `https://maps.googleapis.com/maps/api/js?key=MAPS_API_KEY&libraries=geometry,places`.
+   - Center map on user’s city (configurable) with reasonable zoom; fitBounds on load to show all screens.
+2. Load & render markers:
+   - Fetch `data/screens.json` via `screensService.getScreens()`.
+   - Create markers with `google.maps.Marker`. Attach each marker with its screen id via `marker.screenId`.
+3. Marker click:
+   - Open InfoWindow plus open detail panel. Detail panel loads all related data:
+     - Driver name & phone (lookup by `assignedDriverId`).
+     - History (polyline + list; show timestamps converted to local time).
+     - Last screenshot (render as `<img>` with lazy loading).
+     - Metadata: hardware, brightness, status, assigned ads (clickable).
+4. Draw routes / history:
+   - Use `google.maps.Polyline` for route. If >100 points, simplify (decimation) before drawing.
+   - Provide playback slider: set marker position along polyline by index/time.
+5. Hotspots / heatmap (optional):
+   - Aggregate history points to show heatmap layer using `google.maps.visualization.HeatmapLayer`.
+6. Filtering & search:
+   - Filter screens by driver, status, date-range (only show markers with history points in range).
+   - Debounce search inputs (300ms).
+7. Export:
+   - Generate CSV with history rows: `ts,lat,lng,screenId`.
+   - Provide a GeoJSON export option.
+8. Real-time:
+   - Provide a simple switch to enable "live mode"; if enabled, poll `screensService.getUpdates()` every 5s (or use WebSockets if backend available) and dynamically update marker positions and polylines. Throttle map re-renders.
+9. Error handling:
+   - If Map API fails, show clear error card and fallback to static list view or Leaflet OSM.
+   - Wrap async calls in try/catch and show toast with human-friendly messages.
+
+TECHNICAL / ARCHITECTURE GUIDELINES
+- Modular files:
+  - `screensService.js` — all data operations (getScreens, getDrivers, getScreenById, getHistory, exportCSV, getUpdates). Export Promise-based functions to simulate API. Use caching & mock latency.
+  - `map.js` — initializes Google Map, marker creation, events, clustering, heatmap, polyline drawing, playback animation.
+  - `ui.js` — controls the detail panel / bottom sheet, search & filters, export UI.
+- Use ES6 modules + async/await + arrow functions.
+- Avoid heavy third-party libs—only allow `@googlemaps/markerclustererplus` or Google Maps official helpers.
+- Accessibility:
+  - All interactive controls must be keyboard reachable and labelled (`aria-label`).
+  - Detail panel should trap focus when open and return focus on close.
+- Performance:
+  - Cluster markers in dense regions.
+  - Simplify polylines if >1000 points.
+  - Lazy-load screenshots only when detail panel opens.
+- Privacy & security:
+  - Phone numbers displayed must honor privacy—support a masked view (e.g., show last 4 digits only) if `maskPhone` flag set. Provide obvious UI to reveal full number and a short privacy note.
+  - Do not leak API keys; use `MAPS_API_KEY` from env.
+
+SAMPLE MAP INITIALIZATION SNIPPET (to include in js/map.js)
+```js
+// map.js (snippet)
+import { getScreens, getDrivers } from './screensService.js';
+
+export async function initMap(containerId = 'map') {
+  try {
+    const map = new google.maps.Map(document.getElementById(containerId), {
+      center: { lat: 24.7136, lng: 46.6753 },
+      zoom: 12,
+      gestureHandling: 'greedy',
+      mapTypeControl: false,
+    });
+
+    const screens = await getScreens();
+    const markers = screens.map(s => {
+      const marker = new google.maps.Marker({
+        position: { lat: s.lat, lng: s.lng },
+        title: s.name,
+        icon: getMarkerIcon(s.status),
+      });
+      marker.screenId = s.id;
+      marker.addListener('click', () => onMarkerClick(marker, s, map));
+      return marker;
+    });
+
+    // optional clustering
+    new markerClusterer.MarkerClusterer({ map, markers });
+
+    // fit to markers
+    const bounds = new google.maps.LatLngBounds();
+    markers.forEach(m => bounds.extend(m.getPosition()));
+    map.fitBounds(bounds);
+
+    return { map, markers };
+  } catch (err) {
+    console.error('Map init failed', err);
+    showMapError('Failed to load the map. Please check API key and network.');
+  }
+}
+ACCEPTANCE CRITERIA / QA CHECKLIST
+
+ Map loads successfully with Google Maps API key from env.
+
+ All screens appear as markers; clusters appear when dense.
+
+ Clicking marker opens detail panel with driver name + clickable phone number.
+
+ Panel shows route/history polyline for that screen and lists timestamps (local time).
+
+ "Call driver" opens phone app (tel:) on supported devices.
+
+ "Directions" opens Google Maps directions in new tab.
+
+ Export CSV / GeoJSON of history for the selected screen works.
+
+ Filters & search update markers without full page reload, debounced.
+
+ Real-time toggle updates marker positions (polling or WS) without UI jank.
+
+ Graceful fallback to static list or Leaflet if Google Maps fails.
+
+TEST DATA & DEV HELPERS
+
+Provide data/screens.json with multiple screens across coordinates to test clustering and polylines.
+
+Add a #debug URL param to load larger synthetic history for stress testing (e.g., 2000 points).
+
+Provide a DEV toggle to mask/unmask phone numbers.
+
+IMPORTANT NOTES (for whoever implements)
+
+Enable the Maps JS API and Billing for the project. Set MAPS_API_KEY in environment (Replit secrets).
+
+Consider using Google Maps SDK billing-free alternatives only for prototyping if necessary (Leaflet).
+
+Keep UI responsive: implement bottom-sheet for mobile; ensure large touch targets for call/directions.
+
+Document where the key is set and how to create it in README.
+
+DELIVERABLES
+
+index.html (map page)
+
+css/map.css
+
+js/map.js, js/screensService.js, js/ui.js
+
+data/screens.json (sample)
+
+README with instructions to set MAPS_API_KEY, run locally on Replit, and run test/debug modes.
+
+and 
+
+Build a polished Assign Product → Driver page for RAD that lets admins/operators assign any “product” (ad campaign, device, package, program) to a driver with full driver metadata (id, phone, email, license, vehicle, notes). The page must support single and bulk assignment, show current & historical assignments, validate and persist data (localStorage/mock API), allow direct call/message actions, and export assignment logs.

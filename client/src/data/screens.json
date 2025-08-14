@@ -1,0 +1,138 @@
+{
+  "screens": [
+    {
+      "id": "s1",
+      "name": "Screen Riyadh Central",
+      "alias": "RYD-001",
+      "lat": 24.7136,
+      "lng": 46.6753,
+      "status": "active",
+      "brightness": 120,
+      "lastSeen": "2025-01-14T21:15:00Z",
+      "lastScreenshot": "/assets/screens/s1-last.jpg",
+      "assignedDriverId": "d1",
+      "assignedAds": ["a1", "a2"],
+      "hardware": "Model X Pro",
+      "notes": "Mounted on roof of taxi - King Fahd Road",
+      "history": [
+        {"ts": "2025-01-14T21:00:00Z", "lat": 24.7136, "lng": 46.6753},
+        {"ts": "2025-01-14T20:45:00Z", "lat": 24.7122, "lng": 46.6740},
+        {"ts": "2025-01-14T20:30:00Z", "lat": 24.7108, "lng": 46.6728},
+        {"ts": "2025-01-14T20:15:00Z", "lat": 24.7095, "lng": 46.6715},
+        {"ts": "2025-01-14T20:00:00Z", "lat": 24.7082, "lng": 46.6702}
+      ]
+    },
+    {
+      "id": "s2",
+      "name": "Screen Olaya District",
+      "alias": "OLY-002",
+      "lat": 24.6877,
+      "lng": 46.7219,
+      "status": "active",
+      "brightness": 110,
+      "lastSeen": "2025-01-14T21:12:00Z",
+      "lastScreenshot": "/assets/screens/s2-last.jpg",
+      "assignedDriverId": "d2",
+      "assignedAds": ["a3", "a4"],
+      "hardware": "Model Y Standard",
+      "notes": "Side panel display - Olaya Street",
+      "history": [
+        {"ts": "2025-01-14T21:00:00Z", "lat": 24.6877, "lng": 46.7219},
+        {"ts": "2025-01-14T20:45:00Z", "lat": 24.6864, "lng": 46.7205},
+        {"ts": "2025-01-14T20:30:00Z", "lat": 24.6851, "lng": 46.7192},
+        {"ts": "2025-01-14T20:15:00Z", "lat": 24.6838, "lng": 46.7178},
+        {"ts": "2025-01-14T20:00:00Z", "lat": 24.6825, "lng": 46.7165}
+      ]
+    },
+    {
+      "id": "s3",
+      "name": "Screen Kingdom Tower",
+      "alias": "KNG-003",
+      "lat": 24.6958,
+      "lng": 46.6845,
+      "status": "maintenance",
+      "brightness": 95,
+      "lastSeen": "2025-01-14T19:30:00Z",
+      "lastScreenshot": "/assets/screens/s3-last.jpg",
+      "assignedDriverId": "d3",
+      "assignedAds": ["a5"],
+      "hardware": "Model Z Ultra",
+      "notes": "High-res display near Kingdom Centre",
+      "history": [
+        {"ts": "2025-01-14T19:30:00Z", "lat": 24.6958, "lng": 46.6845},
+        {"ts": "2025-01-14T19:15:00Z", "lat": 24.6945, "lng": 46.6832},
+        {"ts": "2025-01-14T19:00:00Z", "lat": 24.6932, "lng": 46.6819},
+        {"ts": "2025-01-14T18:45:00Z", "lat": 24.6919, "lng": 46.6806},
+        {"ts": "2025-01-14T18:30:00Z", "lat": 24.6906, "lng": 46.6793}
+      ]
+    },
+    {
+      "id": "s4",
+      "name": "Screen Prince Turki",
+      "alias": "PTK-004",
+      "lat": 24.7661,
+      "lng": 46.7380,
+      "status": "offline",
+      "brightness": 0,
+      "lastSeen": "2025-01-14T18:45:00Z",
+      "lastScreenshot": "/assets/screens/s4-last.jpg",
+      "assignedDriverId": "d4",
+      "assignedAds": [],
+      "hardware": "Model X Standard",
+      "notes": "Connection issues - Prince Turki Street",
+      "history": [
+        {"ts": "2025-01-14T18:45:00Z", "lat": 24.7661, "lng": 46.7380},
+        {"ts": "2025-01-14T18:30:00Z", "lat": 24.7648, "lng": 46.7367},
+        {"ts": "2025-01-14T18:15:00Z", "lat": 24.7635, "lng": 46.7354},
+        {"ts": "2025-01-14T18:00:00Z", "lat": 24.7622, "lng": 46.7341},
+        {"ts": "2025-01-14T17:45:00Z", "lat": 24.7609, "lng": 46.7328}
+      ]
+    },
+    {
+      "id": "s5",
+      "name": "Screen Al Malaz",
+      "alias": "MLZ-005",
+      "lat": 24.6304,
+      "lng": 46.7147,
+      "status": "active",
+      "brightness": 125,
+      "lastSeen": "2025-01-14T21:18:00Z",
+      "lastScreenshot": "/assets/screens/s5-last.jpg",
+      "assignedDriverId": "d5",
+      "assignedAds": ["a6", "a7", "a8"],
+      "hardware": "Model Y Pro",
+      "notes": "University area coverage",
+      "history": [
+        {"ts": "2025-01-14T21:00:00Z", "lat": 24.6304, "lng": 46.7147},
+        {"ts": "2025-01-14T20:45:00Z", "lat": 24.6291, "lng": 46.7134},
+        {"ts": "2025-01-14T20:30:00Z", "lat": 24.6278, "lng": 46.7121},
+        {"ts": "2025-01-14T20:15:00Z", "lat": 24.6265, "lng": 46.7108},
+        {"ts": "2025-01-14T20:00:00Z", "lat": 24.6252, "lng": 46.7095}
+      ]
+    }
+  ],
+  "drivers": [
+    {"id": "d1", "name": "Ahmed Al-Rashid", "phone": "+966501234567", "email": "ahmed.rashid@radtaxi.sa", "license": "RYD-2024-001", "vehicle": "Toyota Camry 2023", "notes": "5 years experience, excellent rating"},
+    {"id": "d2", "name": "Mohammed Al-Qarni", "phone": "+966502345678", "email": "mohammed.qarni@radtaxi.sa", "license": "RYD-2024-002", "vehicle": "Honda Accord 2022", "notes": "Tech-savvy, handles downtown routes"},
+    {"id": "d3", "name": "Khalid Al-Mutairi", "phone": "+966503456789", "email": "khalid.mutairi@radtaxi.sa", "license": "RYD-2024-003", "vehicle": "Nissan Altima 2023", "notes": "Maintenance specialist, backup driver"},
+    {"id": "d4", "name": "Abdullah Al-Dosari", "phone": "+966504567890", "email": "abdullah.dosari@radtaxi.sa", "license": "RYD-2024-004", "vehicle": "Toyota Corolla 2022", "notes": "North district coverage"},
+    {"id": "d5", "name": "Fahad Al-Harbi", "phone": "+966505678901", "email": "fahad.harbi@radtaxi.sa", "license": "RYD-2024-005", "vehicle": "Honda Civic 2023", "notes": "University area specialist"}
+  ],
+  "ads": [
+    {"id": "a1", "title": "Coffee Shop Promo", "duration": 15, "type": "video"},
+    {"id": "a2", "title": "Bank Campaign", "duration": 20, "type": "image"},
+    {"id": "a3", "title": "Shopping Mall Sale", "duration": 30, "type": "video"},
+    {"id": "a4", "title": "Restaurant Special", "duration": 25, "type": "video"},
+    {"id": "a5", "title": "Car Dealership", "duration": 35, "type": "video"},
+    {"id": "a6", "title": "University Event", "duration": 15, "type": "image"},
+    {"id": "a7", "title": "Tech Store Opening", "duration": 20, "type": "video"},
+    {"id": "a8", "title": "Medical Center", "duration": 25, "type": "image"}
+  ],
+  "logs": [
+    {"id": "l1", "screenId": "s1", "timestamp": "2025-01-14T21:00:00Z", "event": "ad_play", "details": "Coffee Shop Promo played successfully"},
+    {"id": "l2", "screenId": "s2", "timestamp": "2025-01-14T20:58:00Z", "event": "location_update", "details": "GPS coordinates updated"},
+    {"id": "l3", "screenId": "s3", "timestamp": "2025-01-14T19:30:00Z", "event": "maintenance_start", "details": "Screen entered maintenance mode"},
+    {"id": "l4", "screenId": "s4", "timestamp": "2025-01-14T18:45:00Z", "event": "connection_lost", "details": "Lost connection to server"},
+    {"id": "l5", "screenId": "s5", "timestamp": "2025-01-14T21:15:00Z", "event": "ad_play", "details": "University Event ad completed"}
+  ]
+}

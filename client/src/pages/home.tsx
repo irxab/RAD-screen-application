@@ -10,7 +10,7 @@ import ReportsPage from "@/components/reports/reports-page";
 import AdList from "@/components/ads/ad-list";
 import ScheduleGrid from "@/components/scheduler/schedule-grid";
 import PlayerPreview from "@/components/player/player-preview";
-import InteractiveMap from "@/components/map/interactive-map";
+import GoogleMap from "@/components/map/google-map";
 import LogsTable from "@/components/logs/logs-table";
 import SettingsPanel from "@/components/settings/settings-panel";
 import LoginForm from "@/components/auth/login-form";
@@ -46,7 +46,7 @@ export default function Home() {
       case 'player':
         return <PlayerPreview />;
       case 'map':
-        return <InteractiveMap />;
+        return <GoogleMap />;
       case 'logs':
         return <LogsTable />;
       case 'settings':
