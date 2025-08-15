@@ -1,6 +1,6 @@
 # RAD - Ad Display Platform (Demo)
 
-A sophisticated ad display platform demo built with React, TypeScript, and localStorage persistence. RAD (rebrand of TAXIHUB) provides comprehensive ad management, scheduling, player preview, and analytics capabilities.
+A sophisticated ad display platform demo built with React, TypeScript, and localStorage persistence. RAD provides comprehensive ad management, scheduling, player preview, and analytics capabilities.
 
 ## Features
 
