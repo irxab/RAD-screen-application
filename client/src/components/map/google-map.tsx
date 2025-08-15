@@ -29,8 +29,8 @@ export default function GoogleMap() {
   const [driverData, setDriverData] = useState<any[]>([]);
   const [filters, setFilters] = useState({
     search: '',
-    status: '',
-    driver: ''
+    status: 'all',
+    driver: 'all'
   });
   const [toggles, setToggles] = useState({
     clustering: true,
@@ -50,7 +50,7 @@ export default function GoogleMap() {
 
   const loadScreenData = async () => {
     try {
-      const response = await fetch('/src/data/screens.json');
+      const response = await fetch('/api/screens');
       const data = await response.json();
       setScreenData(data.screens || []);
       setDriverData(data.drivers || []);
@@ -70,7 +70,23 @@ export default function GoogleMap() {
       const response = await fetch('/api/config/maps-key');
       const data = await response.json();
       
-      if (!response.ok || !data.apiKey) {
+      if (!response.ok) {
+        setMapError('Failed to fetch API configuration from server.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Handle demo mode
+      if (data.demoMode) {
+        console.log('Running in demo mode:', data.message);
+        // In demo mode, we'll show a static map representation
+        setIsLoading(false);
+        setMapError(null);
+        setIsMapReady(true);
+        return;
+      }
+
+      if (!data.apiKey) {
         setMapError('Google Maps API key not configured on server.');
         setIsLoading(false);
         return;
@@ -299,6 +315,96 @@ export default function GoogleMap() {
     return masked + phone.slice(-showLast);
   };
 
+  // Demo mode fallback map component
+  const DemoMap = () => {
+    const mapCenter = { lat: 24.7136, lng: 46.6753 };
+    const mapBounds = {
+      minLat: 24.6,
+      maxLat: 24.8,
+      minLng: 46.6,
+      maxLng: 46.8
+    };
+    
+    const scaleX = 800 / (mapBounds.maxLng - mapBounds.minLng);
+    const scaleY = 600 / (mapBounds.maxLat - mapBounds.minLat);
+    
+    const transformCoord = (lat: number, lng: number) => ({
+      x: (lng - mapBounds.minLng) * scaleX,
+      y: (mapBounds.maxLat - lat) * scaleY
+    });
+
+    return (
+      <div className="w-full h-full bg-gray-100 rounded-lg relative">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center p-4">
+            <MapPin className="w-12 h-12 mx-auto mb-2 text-rad-blue" />
+            <h3 className="text-lg font-semibold text-rad-grey-800 mb-2">Demo Map View</h3>
+            <p className="text-sm text-rad-grey-600 mb-4">
+              Interactive map view with screen locations
+            </p>
+          </div>
+        </div>
+        
+        <svg className="w-full h-full absolute inset-0" viewBox="0 0 800 600">
+          {/* Background grid */}
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+          
+          {/* Screen markers */}
+          {screenData.map(screen => {
+            const pos = transformCoord(screen.lat, screen.lng);
+            const colors = {
+              active: '#0b6ef6',
+              offline: '#6b7280',
+              maintenance: '#f59e0b'
+            };
+            const color = colors[screen.status as keyof typeof colors] || colors.offline;
+            
+            return (
+              <g key={screen.id} className="cursor-pointer hover:opacity-80">
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r="8"
+                  fill={color}
+                  stroke="#ffffff"
+                  strokeWidth="2"
+                  onClick={() => openScreenDetails(screen)}
+                />
+                <text
+                  x={pos.x}
+                  y={pos.y + 20}
+                  textAnchor="middle"
+                  fontSize="10"
+                  fill="#374151"
+                  fontWeight="bold"
+                >
+                  {screen.alias}
+                </text>
+              </g>
+            );
+          })}
+          
+          {/* Legend */}
+          <g transform="translate(20, 20)">
+            <rect width="200" height="80" fill="white" stroke="#d1d5db" strokeWidth="1" rx="4" />
+            <text x="10" y="20" fontSize="12" fontWeight="bold" fill="#374151">Legend</text>
+            <circle cx="15" cy="35" r="4" fill="#0b6ef6" />
+            <text x="25" y="40" fontSize="10" fill="#374151">Active</text>
+            <circle cx="15" cy="50" r="4" fill="#6b7280" />
+            <text x="25" y="55" fontSize="10" fill="#374151">Offline</text>
+            <circle cx="15" cy="65" r="4" fill="#f59e0b" />
+            <text x="25" y="70" fontSize="10" fill="#374151">Maintenance</text>
+          </g>
+        </svg>
+      </div>
+    );
+  };
+
   if (mapError) {
     return (
       <div className="space-y-6">
@@ -354,10 +460,10 @@ export default function GoogleMap() {
               <Label htmlFor="status-filter">Filter by Status</Label>
               <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
                 <SelectTrigger data-testid="select-status-filter">
-                  <SelectValue placeholder="All Statuses" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="offline">Offline</SelectItem>
                   <SelectItem value="maintenance">Maintenance</SelectItem>
@@ -369,10 +475,10 @@ export default function GoogleMap() {
               <Label htmlFor="driver-filter">Filter by Driver</Label>
               <Select value={filters.driver} onValueChange={(value) => setFilters(prev => ({ ...prev, driver: value }))}>
                 <SelectTrigger data-testid="select-driver-filter">
-                  <SelectValue placeholder="All Drivers" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Drivers</SelectItem>
+                  <SelectItem value="all">All Drivers</SelectItem>
                   {driverData.map(driver => (
                     <SelectItem key={driver.id} value={driver.id}>
                       {driver.name}
@@ -440,11 +546,15 @@ export default function GoogleMap() {
                 <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10">
                   <div className="text-center">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-rad-blue" />
-                    <p className="text-rad-grey-600">Loading Google Maps...</p>
+                    <p className="text-rad-grey-600">Loading map...</p>
                   </div>
                 </div>
               )}
-              <div ref={mapRef} className="w-full h-full rounded-lg" />
+              {!isLoading && !window.google?.maps ? (
+                <DemoMap />
+              ) : (
+                <div ref={mapRef} className="w-full h-full rounded-lg" />
+              )}
             </CardContent>
           </Card>
         </div>

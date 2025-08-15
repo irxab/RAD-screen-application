@@ -10,9 +10,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/config/maps-key', (req, res) => {
     const mapsApiKey = process.env.MAPS_API_KEY;
     if (!mapsApiKey) {
-      return res.status(500).json({ error: 'Maps API key not configured' });
+      // For demo purposes, return a fallback response
+      // In production, you would want to configure a real API key
+      return res.json({ 
+        apiKey: null, 
+        demoMode: true,
+        message: 'Demo mode: Using static map data. Configure MAPS_API_KEY environment variable for full functionality.'
+      });
     }
-    res.json({ apiKey: mapsApiKey });
+    res.json({ apiKey: mapsApiKey, demoMode: false });
+  });
+
+  // API endpoint to get screen data
+  app.get('/api/screens', async (req, res) => {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const { fileURLToPath } = await import('url');
+      const __dirname = path.dirname(fileURLToPath(import.meta.url));
+      const screensPath = path.join(__dirname, '..', 'client', 'src', 'data', 'screens.json');
+      const screensData = JSON.parse(fs.readFileSync(screensPath, 'utf8'));
+      res.json(screensData);
+    } catch (error) {
+      console.error('Error loading screens data:', error);
+      res.status(500).json({ error: 'Failed to load screens data' });
+    }
   });
 
   // use storage to perform CRUD operations on the storage interface
